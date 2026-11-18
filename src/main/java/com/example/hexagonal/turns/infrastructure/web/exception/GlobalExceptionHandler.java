@@ -23,6 +23,7 @@ import org.springframework.web.ErrorResponse;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.http.HttpHeaders;
 
 import java.util.Map;
 import java.util.Set;
@@ -118,8 +119,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<Map<String, Object>> handleAuthentication(AuthenticationException ex,
                                                                     HttpServletRequest request) {
-        return respond(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED",
-                "Se requiere autenticacion valida para acceder a este recurso", request);
+        // Un 401 siempre lleva WWW-Authenticate, igual que el que escribe el filtro de seguridad
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .header(HttpHeaders.WWW_AUTHENTICATE, "Bearer")
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(ProblemBody.of(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED",
+                        "Se requiere autenticacion valida para acceder a este recurso", request.getRequestURI()));
     }
 
     /** Errores estandar de Spring (ruta inexistente, tipo de contenido, etc.) con su estado; el resto es un 500. */
