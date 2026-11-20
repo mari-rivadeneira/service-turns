@@ -24,6 +24,9 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.http.HttpHeaders;
+import com.example.hexagonal.turns.application.exception.InvalidRequestException;
+import com.example.hexagonal.turns.application.exception.ProfessionalDisabledException;
+import com.example.hexagonal.turns.application.exception.ProfessionalNotFoundException;
 
 import java.util.Map;
 import java.util.Set;
@@ -136,6 +139,27 @@ public class GlobalExceptionHandler {
         }
         log.error("Error inesperado en {} {}", request.getMethod(), request.getRequestURI(), ex);
         return respond(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR", "Ocurrio un error inesperado", request);
+    }
+
+    @ExceptionHandler(InvalidRequestException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidRequest(InvalidRequestException ex,
+                                                                    HttpServletRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.APPLICATION_PROBLEM_JSON)
+                .body(ProblemBody.of(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR",
+                        "Los datos enviados no son validos", request.getRequestURI(), ex.getFieldErrors()));
+    }
+
+    @ExceptionHandler(ProfessionalNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleProfessionalNotFound(ProfessionalNotFoundException ex,
+                                                                          HttpServletRequest request) {
+        return respond(HttpStatus.NOT_FOUND, "PROFESSIONAL_NOT_FOUND", "El profesional no existe", request);
+    }
+
+    @ExceptionHandler(ProfessionalDisabledException.class)
+    public ResponseEntity<Map<String, Object>> handleProfessionalDisabled(ProfessionalDisabledException ex,
+                                                                          HttpServletRequest request) {
+        return respond(HttpStatus.CONFLICT, "PROFESSIONAL_DISABLED", "El profesional no esta habilitado", request);
     }
 
     private ResponseEntity<Map<String, Object>> respond(HttpStatusCode status, String code, String detail,
