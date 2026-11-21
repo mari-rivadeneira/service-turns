@@ -27,7 +27,10 @@ import org.springframework.http.HttpHeaders;
 import com.example.hexagonal.turns.application.exception.InvalidRequestException;
 import com.example.hexagonal.turns.application.exception.ProfessionalDisabledException;
 import com.example.hexagonal.turns.application.exception.ProfessionalNotFoundException;
-
+import com.example.hexagonal.turns.application.exception.HoldExpiredException;
+import com.example.hexagonal.turns.application.exception.ReservationInProgressException;
+import com.example.hexagonal.turns.application.exception.ReservationNotFoundException;
+import com.example.hexagonal.turns.application.exception.SlotUnavailableException;
 import java.util.Map;
 import java.util.Set;
 
@@ -154,6 +157,31 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleProfessionalNotFound(ProfessionalNotFoundException ex,
                                                                           HttpServletRequest request) {
         return respond(HttpStatus.NOT_FOUND, "PROFESSIONAL_NOT_FOUND", "El profesional no existe", request);
+    }
+
+    @ExceptionHandler(SlotUnavailableException.class)
+    public ResponseEntity<Map<String, Object>> handleSlotUnavailable(SlotUnavailableException ex,
+                                                                     HttpServletRequest request) {
+        return respond(HttpStatus.CONFLICT, "SLOT_UNAVAILABLE", "El turno ya no esta disponible", request);
+    }
+
+    @ExceptionHandler(HoldExpiredException.class)
+    public ResponseEntity<Map<String, Object>> handleHoldExpired(HoldExpiredException ex,
+                                                                 HttpServletRequest request) {
+        return respond(HttpStatus.CONFLICT, "HOLD_EXPIRED", "El bloqueo del turno ya no esta vigente", request);
+    }
+
+    @ExceptionHandler(ReservationNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleReservationNotFound(ReservationNotFoundException ex,
+                                                                         HttpServletRequest request) {
+        return respond(HttpStatus.NOT_FOUND, "RESERVATION_NOT_FOUND", "La reserva no existe", request);
+    }
+
+    @ExceptionHandler(ReservationInProgressException.class)
+    public ResponseEntity<Map<String, Object>> handleReservationInProgress(ReservationInProgressException ex,
+                                                                           HttpServletRequest request) {
+        return respond(HttpStatus.CONFLICT, "RESERVATION_IN_PROGRESS",
+                "Ya hay una reserva en curso para ese turno", request);
     }
 
     @ExceptionHandler(ProfessionalDisabledException.class)
