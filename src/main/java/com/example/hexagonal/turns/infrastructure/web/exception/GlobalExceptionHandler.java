@@ -33,6 +33,7 @@ import com.example.hexagonal.turns.application.exception.ReservationNotFoundExce
 import com.example.hexagonal.turns.application.exception.SlotUnavailableException;
 import java.util.Map;
 import java.util.Set;
+import com.example.hexagonal.turns.application.exception.PhonePublishException;
 
 /**
  * Traduce las excepciones a application/problem+json con un code estable. Las issues siguientes agregan aca los
@@ -188,6 +189,15 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleProfessionalDisabled(ProfessionalDisabledException ex,
                                                                           HttpServletRequest request) {
         return respond(HttpStatus.CONFLICT, "PROFESSIONAL_DISABLED", "El profesional no esta habilitado", request);
+    }
+
+    @ExceptionHandler(PhonePublishException.class)
+    public ResponseEntity<Map<String, Object>> handlePhonePublish(PhonePublishException ex,
+                                                                  HttpServletRequest request) {
+        log.warn("No se pudo publicar el telefono en {} {}: {}", request.getMethod(), request.getRequestURI(),
+                ex.getMessage());
+        return respond(HttpStatus.SERVICE_UNAVAILABLE, "KAFKA_UNAVAILABLE",
+                "No se pudo enviar el telefono: vuelva a intentarlo", request);
     }
 
     private ResponseEntity<Map<String, Object>> respond(HttpStatusCode status, String code, String detail,
