@@ -6,6 +6,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 public interface ReservationProcessRepository {
 
@@ -26,6 +28,10 @@ public interface ReservationProcessRepository {
     Optional<ReservationProcess> findByIdAndUserId(UUID id, Long userId);
 
     Optional<ReservationProcess> findByCatedraProcessId(String catedraProcessId);
+
+    /** Proceso en curso (no final) del usuario para ese turno: repetir el pedido no debe duplicar la reserva. */
+    Optional<ReservationProcess> findActiveByUserAndSlot(Long userId, Long professionalId, LocalDate date,
+                                                         LocalTime startTime);
 
     /** Procesos del usuario, del mas nuevo al mas viejo. */
     List<ReservationProcess> findByUserId(Long userId);

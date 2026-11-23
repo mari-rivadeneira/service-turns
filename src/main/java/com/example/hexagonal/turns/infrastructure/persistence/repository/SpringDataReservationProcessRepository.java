@@ -11,6 +11,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 public interface SpringDataReservationProcessRepository extends JpaRepository<ReservationProcessEntity, UUID> {
 
@@ -26,4 +28,13 @@ public interface SpringDataReservationProcessRepository extends JpaRepository<Re
                                                  @Param("now") Instant now);
 
     List<ReservationProcessEntity> findByStatusAndCreatedAtBefore(ReservationStatus status, Instant threshold);
+
+    @Query("select p from ReservationProcessEntity p where p.userId = :userId "
+            + "and p.professionalId = :professionalId and p.appointmentDate = :date "
+            + "and p.startTime = :startTime and p.status in :statuses order by p.createdAt desc")
+    List<ReservationProcessEntity> findActiveBySlot(@Param("userId") Long userId,
+                                                    @Param("professionalId") Long professionalId,
+                                                    @Param("date") LocalDate date,
+                                                    @Param("startTime") LocalTime startTime,
+                                                    @Param("statuses") Collection<ReservationStatus> statuses);
 }

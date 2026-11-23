@@ -18,6 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Repository
 public class ReservationProcessJpaAdapter implements ReservationProcessRepository {
@@ -32,6 +34,10 @@ public class ReservationProcessJpaAdapter implements ReservationProcessRepositor
 
     private final SpringDataReservationProcessRepository repository;
     private final ReservationProcessMapper mapper;
+    /** Procesos que todavia no llegaron a un estado final (incluye CONFIRMED, que solo admite cancelarse). */
+    private static final List<ReservationStatus> ACTIVE = Arrays.stream(ReservationStatus.values())
+            .filter(status -> !status.isFinal())
+            .toList();
 
     public ReservationProcessJpaAdapter(SpringDataReservationProcessRepository repository,
                                         ReservationProcessMapper mapper) {
@@ -95,5 +101,14 @@ public class ReservationProcessJpaAdapter implements ReservationProcessRepositor
         return repository.findByStatusAndCreatedAtBefore(ReservationStatus.STARTED, threshold).stream()
                 .map(mapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<ReservationProcess> findActiveByUserAndSlot(Long userId, Long professionalId, LocalDate date,
+                                                                LocalTime startTime) {
+        return repository.findActiveBySlot(userId, professionalId, date, startTime, ACTIVE).stream()
+                .findFirst()
+                .map(mapper::toDomain);
     }
 }
