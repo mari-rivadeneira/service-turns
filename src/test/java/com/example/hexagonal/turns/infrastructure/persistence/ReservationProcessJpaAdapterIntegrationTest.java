@@ -278,4 +278,24 @@ class ReservationProcessJpaAdapterIntegrationTest {
         assertNull(stored.getReservationId());
         assertNotNull(stored.getPatientPhone());
     }
+
+    @Test
+    @DisplayName("Busca el proceso activo del usuario para un turno: ignora los finales, otros usuarios y otros turnos")
+    void shouldFindTheActiveProcessOfAUserForASlot() {
+        ReservationProcess failed = repository.create(process(USER, 9, NOW));
+        failed.failed("fallo", NOW);
+        repository.update(failed);
+        ReservationProcess active = repository.create(process(USER, 9, NOW.plusSeconds(5)));
+        repository.create(process(OTHER_USER, 9, NOW.plusSeconds(6)));
+        repository.create(process(USER, 10, NOW.plusSeconds(7)));
+
+        ReservationProcess found = repository.findActiveByUserAndSlot(
+                USER, 900_001L, LocalDate.of(2026, 12, 1), LocalTime.of(9, 0)).orElseThrow();
+
+        assertEquals(active.getId(), found.getId());
+        assertTrue(repository.findActiveByUserAndSlot(
+                USER, 900_001L, LocalDate.of(2026, 12, 1), LocalTime.of(15, 0)).isEmpty());
+        assertTrue(repository.findActiveByUserAndSlot(
+                OTHER_USER + 1, 900_001L, LocalDate.of(2026, 12, 1), LocalTime.of(9, 0)).isEmpty());
+    }
 }
