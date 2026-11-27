@@ -31,6 +31,7 @@ import com.example.hexagonal.turns.application.exception.HoldExpiredException;
 import com.example.hexagonal.turns.application.exception.ReservationInProgressException;
 import com.example.hexagonal.turns.application.exception.ReservationNotFoundException;
 import com.example.hexagonal.turns.application.exception.SlotUnavailableException;
+import com.example.hexagonal.turns.application.exception.ReservationNotCancellableException;
 import java.util.Map;
 import java.util.Set;
 import com.example.hexagonal.turns.application.exception.PhonePublishException;
@@ -189,6 +190,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleProfessionalDisabled(ProfessionalDisabledException ex,
                                                                           HttpServletRequest request) {
         return respond(HttpStatus.CONFLICT, "PROFESSIONAL_DISABLED", "El profesional no esta habilitado", request);
+    }
+
+    @ExceptionHandler(ReservationNotCancellableException.class)
+    public ResponseEntity<Map<String, Object>> handleReservationNotCancellable(ReservationNotCancellableException ex,
+                                                                               HttpServletRequest request) {
+        return respond(HttpStatus.CONFLICT, "RESERVATION_NOT_CANCELLABLE",
+                "La reserva no se puede cancelar en su estado actual", request);
     }
 
     @ExceptionHandler(PhonePublishException.class)

@@ -12,6 +12,7 @@ import com.example.hexagonal.turns.domain.model.ReservationStatus;
 import com.example.hexagonal.turns.domain.port.in.CancelReservationUseCase;
 import com.example.hexagonal.turns.domain.port.out.CatedraAppointmentClient;
 import com.example.hexagonal.turns.domain.port.out.ReservationProcessRepository;
+import com.example.hexagonal.turns.application.service.ReservationTransitions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
